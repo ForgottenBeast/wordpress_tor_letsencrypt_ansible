@@ -1,20 +1,34 @@
-- name: "Install ipset"
+- name: "Install ipset and iptables-persistent"
   apt:
-    name: ipset
+    name: "{{ item }}"
+  with_items:
+    - ipset
+    - iptables-persistent
+
+- name: "Are you sure you want to proceed?"
+  pause:
+    prompt: |
+      "You are about to create a minimal persistent set of iptables rules to prevent machines       outside of cloudflare IP range from connecting to you. Those rules will be written to
+
+      /etc/iptables/rules.v4
+
+      if you already have rules in there, now is the time to make a back up. Alternatively
+      you can restart the present playbook without the firewall tag"
 
 - name: "Push iptables rules"
   copy:
     content: "{{ iptables_rules }}"
-    dest: /tmp/iptables_rules
+    dest: /etc/iptables/rules.v4
 
 
-- name: "Restore ipset from online list"
+- name: "Restore ipset from online list and make it persistent"
   shell: | 
     ipset create cloudflare hash:net
     for x in $(curl https://www.cloudflare.com/ips-v4); do ipset add cloudflare $x; done
+    ipset save > /etc/ipset.conf
 
 - name: "Restore iptables rules from file"
-  command: iptables-restore /tmp/iptables_rules
+  command: iptables-restore /etc/iptables/rules.v4
 
 - name: "Clean up conf files"
   file:
