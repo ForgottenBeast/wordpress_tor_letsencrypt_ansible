@@ -58,13 +58,12 @@
   become: True
   tags: wp_all_restore
 
-- name: "Allow docker container to communicate with the outside"
+- name: "Allow docker containers to communicate with the outside"
   become: True
-  iptables:
-    table: nat
-    chain: POSTROUTING
-    out_interface: eth0
-    jump: MASQUERADE
+  tags:
+   - wp_deploy
+   - wp_restore
+  command: iptables -t nat -A POSTROUTING -s 172.0.0.0/8 ! -d 172.0.0.0/8 -j MASQUERADE
 
 - include: deploy.yml
   become: True
@@ -109,3 +108,17 @@
   become: True
   tags: firewall
   when: CLOUDFLARE == True
+
+- name: "Pause on cloudflare"
+  become: True
+  tags: wp_renew
+  pause:
+    prompt: |
+      "Before renewing your certificate, please pause your website on cloudflare so letsencrypt
+      can reach it."
+
+- name: "start cert renewal procedure"
+  include: renew.yml
+  become: True
+  tags: wp_renew
+

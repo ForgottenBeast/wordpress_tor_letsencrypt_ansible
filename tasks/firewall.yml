@@ -15,22 +15,22 @@
       if you already have rules in there, now is the time to make a back up. Alternatively
       you can restart the present playbook without the firewall tag"
 
-- name: "Push iptables rules"
-  copy:
-    content: "{{ iptables_rules }}"
-    dest: /etc/iptables/rules.v4
-
-
-- name: "Restore ipset from online list and make it persistent"
+- name: "Create ipset from online list and make it persistent"
   shell: | 
     ipset create cloudflare hash:net
     for x in $(curl https://www.cloudflare.com/ips-v4); do ipset add cloudflare $x; done
     ipset save > /etc/ipset.conf
 
-- name: "Restore iptables rules from file"
-  command: iptables-restore /etc/iptables/rules.v4
+- name: "Create cloudflare chain"
+  command: |
+    iptables -N CloudflareChain;
+    iptables -A CloudflareChain -m set --match-set cloudflare src -j RETURN;
+    iptables -A CloudflareChain -j DROP;
 
-- name: "Clean up conf files"
-  file:
-    name: /tmp/iptables_rules
-    state: absent
+- name: "Prevent access to port 80 and 443 from outside cloudflare"
+  command: |
+    iptables -A INPUT -i eth0 -p tcp -m tcp --dport 80 -m state --state NEW,ESTABLISHED -j CloudflareChain;
+    iptables -A INPUT -i eth0 -p tcp -m tcp --dport 443 -m state --state NEW,ESTABLISHED -j CloudflareChain
+
+- name: "Save iptables rules"
+  command: iptables-save > /etc/iptables/rules.v4

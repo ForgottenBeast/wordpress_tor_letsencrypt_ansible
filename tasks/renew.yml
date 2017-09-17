@@ -1,0 +1,15 @@
+- name: "Disabling cloudflare chain for port 80"
+  shell: iptables -D INPUT -i eth0 -p tcp -m tcp --dport 80 -m state --state NEW,ESTABLISHED -j CloudflareChain
+
+- name: "Restart letsencrypt companion"
+  command: docker restart {{ project_name }}_letsencrypt_nginx_companion_1
+
+- name: "Wait for it..."
+  pause:
+    prompt: |
+      "Using: docker logs {{project_name}}_letsencrypt_nginx_companion_1 check that
+      your certificate has been correctly renewed before continuing. Once it's done
+      you can unpause your site on cloudflare."
+
+- name: "Enabling cloudflaire chain for port 80"
+  shell: iptables -A INPUT -i eth0 -p tcp -m tcp --dport 80 -m state --state NEW,ESTABLISHED -j CloudflareChain

@@ -20,6 +20,8 @@ CLOUDFLARE: True if you only want to accept connections from cloudflare machines
 * *wp_db_restore* restore data from backups only for db
 * *wp_deploy* deploy wordpress container with db
 * *show_onion* display onion url when tor_hh is enabled
+* *wp_renew* Use when it's time to renew your certificate while using cloudflare
+  firewall rules. Pause your site on cloudflare first then run those tasks.
 
 ---
 # DANGEROUS TAGS
