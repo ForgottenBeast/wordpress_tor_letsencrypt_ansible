@@ -1,0 +1,67 @@
+{% macro wpkey(key) %}
+{{ key }}
+{% endmacro %}
+
+
+version: "2"
+volumes:
+  {{ DB_VOLUME }}:
+    external: True
+  {{ WP_VOLUME }}:
+    external: True
+
+services:
+
+  nginx:
+    image: jwilder/nginx-proxy
+    ports:
+      - "443:443"
+      - "80:80"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - "/etc/nginx/vhost.d"
+      - "/usr/share/nginx/html"
+      - "/etc/nginx/certs"
+
+  letsencrypt_nginx_companion:
+    image: jrcs/letsencrypt-nginx-proxy-companion
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    volumes_from:
+      - "nginx"
+
+  db:
+    image: mariadb:latest
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD={{ database_password }}
+    volumes:
+     - {{ DB_VOLUME }}:/var/lib/mysql
+
+  wordpress:
+    restart: always
+    image: wordpress
+    environment:
+     WORDPRESS_DB_PASSWORD: {{ database_password }}
+     VIRTUAL_HOST: {{ wordpress_domain_name }}
+{% if SSL == True %}
+     LETSENCRYPT_HOST: {{ wordpress_domain_name }}
+     LETSENCRYPT_EMAIL: {{ wordpress_letsencrypt_mail }}
+     LETSENCRYPT_TEST: "{{ letsencrypt_testmode }}"
+{% endif %}
+    volumes:
+     - {{ WP_VOLUME }}:/var/www/html
+    links:
+     - db:mysql
+{% if TOR_HH == True %}
+  torhh:
+    restart: always
+    image: goldy/tor-hidden-service
+    links:
+      - wordpress
+    environment:
+      WORDPRESS_KEY: |
+{{ wpkey(tor_hidden_service_private_key) | indent(8,True) }}
+        
+      WORDPRESS_PORTS: 80:80
+{% endif %}

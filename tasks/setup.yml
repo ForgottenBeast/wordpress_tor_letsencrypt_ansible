@@ -1,0 +1,52 @@
+################################################################
+#If you add files in here remove them at the end of task block!#
+################################################################
+
+- name: "Update local wordpress clean image"
+  docker_image:
+    name: wordpress
+    state: present
+    force: True
+    pull: True
+
+- name: "Start temporary clean wordpress service to copy files"
+  docker_container:
+    name: tmp_wp
+    image: wordpress
+    state: started
+    volumes:
+      - "{{ WP_VOLUME }}:/wp_files"
+
+- name: "Start temporary clean maria service to copy files"
+  docker_container:
+    name: tmp_db
+    image: mariadb
+    state: started
+    env:
+      MYSQL_ROOT_PASSWORD: "{{ database_password }}"
+    volumes:
+      - "{{ DB_VOLUME }}:/maria_files"
+
+- name: "Wait 5 seconds for db to start up"
+  pause:
+    seconds: 5
+
+- name: "Copy clean files to docker volumes"
+  shell: |
+    docker exec tmp_wp bash -c "cp -a /var/www/html/. /wp_files; \
+            chown www-data:www-data -R /wp_files && \
+            find /wp_files -type d -exec chmod 755 {} \; && \
+            find /wp_files -type f -exec chmod 644 {} \; &&\
+            chmod 600 /wp_files/wp-config.php "
+
+
+    docker exec tmp_db cp -a /var/lib/mysql/. /mariafiles
+  retries: 3
+
+- name: "Stop temporary services"
+  docker_container:
+    name: "{{ item }}"
+    state: absent
+  with_items:
+    - tmp_db
+    - tmp_wp

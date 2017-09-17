@@ -1,0 +1,37 @@
+- name: "Backup wordpress data"
+  tags: wp_backup
+  shell: |
+    docker run --rm -i -v {{ WP_VOLUME }}:/volume:ro -v /tmp:/backup {{ alpine_image }} \
+       tar -cjf /backup/wp_backup_{{ inventory_hostname }}_{{ ansible_date_time.date }}.tar.bz2 -C /volume ./
+
+- name: "Backup wordpress db"
+  tags: wp_db_backup
+  shell: |
+    docker run --rm -i -v {{ DB_VOLUME }}:/volume:ro -v /tmp:/backup {{ alpine_image }} \
+       tar -cjf /backup/wp_db_backup_{{ inventory_hostname }}_{{ ansible_date_time.date }}.tar.bz2 -C /volume ./
+
+- name: "Retrieve db backup files"
+  tags: wp_db_backup
+  fetch:
+    flat: True
+    src: /tmp/{{ item }}
+    dest: "{{ playbook_dir }}/{{ item }}"
+  with_items:
+    - "wp_db_backup_{{ inventory_hostname }}_{{ ansible_date_time.date }}.tar.bz2"
+
+- name: "Retrieve wp backup files"
+  tags: wp_backup
+  fetch:
+    flat: True
+    src: /tmp/{{ item }}
+    dest: "{{ playbook_dir }}/{{ item }}"
+  with_items:
+    - "wp_backup_{{ inventory_hostname }}_{{ ansible_date_time.date }}.tar.bz2"
+
+- name: "Clean up backup files"
+  file:
+    name: "{{ item }}"
+    state: absent
+  with_items:
+    - "/tmp/wp_backup_{{ inventory_hostname }}_{{ ansible_date_time.date }}.tar.bz2"
+    - "/tmp/wp_db_backup_{{ inventory_hostname }}_{{ ansible_date_time.date }}.tar.bz2"

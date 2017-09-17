@@ -1,0 +1,22 @@
+- name: "Install ipset"
+  apt:
+    name: ipset
+
+- name: "Push iptables rules"
+  copy:
+    content: "{{ iptables_rules }}"
+    dest: /tmp/iptables_rules
+
+
+- name: "Restore ipset from online list"
+  shell: | 
+    ipset create cloudflare hash:net
+    for x in $(curl https://www.cloudflare.com/ips-v4); do ipset add cloudflare $x; done
+
+- name: "Restore iptables rules from file"
+  command: iptables-restore /tmp/iptables_rules
+
+- name: "Clean up conf files"
+  file:
+    name: /tmp/iptables_rules
+    state: absent

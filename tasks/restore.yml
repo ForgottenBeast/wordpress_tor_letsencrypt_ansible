@@ -1,0 +1,48 @@
+- name: "Copy data from backup folder to remote host"
+  tags:
+    - wp_restore
+    - wp_db_restore
+  copy:
+    src: "{{ item }}"
+    dest: /tmp/{{ item }}
+  with_items:
+    - "{{ WP_BACKUP_FILE }}"
+    - "{{ WP_DB_BACKUP_FILE }}"
+
+- name: "Stopping wordpress stack"
+  docker_service:
+    state: absent
+    project_src: /tmp/{{ project_name }}
+
+- name: "restore data from backup to wordpress"
+  tags: wp_restore
+  shell: |
+    docker run --rm -i -v {{ WP_VOLUME }}:/wp -v /tmp:/backup:ro \
+        {{ alpine_image }} \
+        sh -c "\
+        apk update;\
+        apk add -y tar;\
+        rm -rf /wp/* ;\
+        tar -C /wp/ -xjf /backup/{{ WP_BACKUP_FILE }};"
+
+- name: "restore data from backup to db"
+  tags: wp_db_restore
+  shell: |
+    docker run --rm -i -v {{ DB_VOLUME }}:/db -v /tmp:/backup:ro \
+        {{ alpine_image }} \
+        sh -c "\
+        apk update;\
+        apk add -y tar;\
+        rm -rf /db/* ;\
+        tar -C /db/ -xjf /backup/{{ WP_DB_BACKUP_FILE }}"
+
+- name: "Remove backup data"
+  tags:
+    - wp_restore
+    - wp_db_restore
+  file:
+    name: /tmp/{{ item }}
+    state: absent
+  with_items:
+    - "{{ WP_BACKUP_FILE }}"
+    - "{{ WP_DB_BACKUP_FILE }}"

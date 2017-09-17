@@ -1,0 +1,103 @@
+- include: requirements.yml
+  become: True
+  tags:
+   - wp_deploy
+   - docker_install
+
+- name: "Test if docker is installed"
+  tags: wp_deploy
+  become: True
+  command: which docker
+  ignore_errors: True
+  register: docker_present
+
+- name: "Installing docker"
+  include: docker_install.yml
+  become: True
+  tags: wp_deploy
+  when: docker_present|failed
+
+- include: create_volumes.yml
+  become: True
+  tags:
+    - wp_volumes_setup
+    - wp_setup
+
+- include: setup.yml
+  become: True
+  tags: wp_setup
+
+- include: backup.yml
+  become: True
+  tags: wp_all_backup
+
+- name: "Create docker-compose folder"
+  tags:
+   - wp_destroy
+   - wp_deploy
+   - wp_restore
+  file:
+    name: /tmp/{{ project_name }}
+    state: directory
+
+- name: "Creating a tor hidden service private key if there is none..."
+  include: gen_rsa.yml
+  when: tor_hidden_service_private_key == None and
+        TOR_HH == True
+
+- name: "Write docker-compose"
+  tags: 
+    - wp_destroy
+    - wp_deploy
+    - wp_restore
+  template:
+    src: docker-compose.j2
+    dest: /tmp/{{ project_name }}/docker-compose.yml
+
+- include: restore.yml
+  become: True
+  tags: wp_all_restore
+
+- include: deploy.yml
+  become: True
+  tags:
+    - wp_deploy
+    - wp_restore
+
+- include: destroy.yml
+  become: True
+  tags: wp_destroy
+
+- name: "Remove docker-compose folder"
+  become: True
+  tags:
+    - wp_deploy
+    - wp_destroy
+    - wp_restore
+  file:
+    name: /tmp/{{ project_name }}
+    state: absent
+
+- debug:
+    msg: The deed is done.
+  tags: wp_destroy
+
+- name: "Check up time!"
+  tags: firewall
+  pause:
+    prompt: |
+      "Please make sure that the letsencrypt certificate has been correctly generated
+      before continuing with the firewall setup. If you set up the firewall before the
+      letsencrypt certificate has been obtained then letsencrypt servers won't be able 
+      to contact yours.
+
+      To check your certificate status connect to your server using ssh and run:
+      docker logs -f wpstack_letsencrypt_nginx_companion_1
+
+      Then wait until you get the message that the certificate has been correctly created."
+  when: CLOUDFLARE == True
+
+- include: firewall.yml
+  become: True
+  tags: firewall
+  when: CLOUDFLARE == True

@@ -1,0 +1,26 @@
+- name: "Deploy wordpress stack"
+  docker_service:
+    state: present
+    project_src: /tmp/{{ project_name }}
+
+- name: "Repairing permissions"
+  shell: |
+      docker exec {{ project_name }}_wordpress_1 bash -c "\
+        chown www-data:www-data -R /var/www/html ; \
+        find /var/www/html -type d -exec chmod 755 {} ;  \
+        find /var/www/html -type f -exec chmod 644 {} ; \
+        chmod 600 /var/www/html/wp-config.php "
+
+- name: "Waiting for proxy to come up..."
+  pause:
+    seconds: 10
+
+- name: "Getting onion url..."
+  tags: show_onion
+  command: docker exec -i {{ project_name }}_torhh_1 onions
+  register: onions
+  when: TOR_HH == True
+
+- debug:
+    msg: "Onion url: {{ onions.stdout }}"
+  when: TOR_HH == True

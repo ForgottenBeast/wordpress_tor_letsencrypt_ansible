@@ -1,0 +1,38 @@
+#Be advised that enabling the Firewall BEFORE obtaining the letsencrypt
+#certificate will prevent correct certificate generation, because an IP from out
+#of the cloudflare chain will try to access the website
+#
+#
+#alpine image used for volume backup and restores
+alpine_image: alpine
+
+iptables_rules: |
+  -A whatever blablabla
+
+#if left undefined a key will be automatically created
+tor_hidden_service_private_key:
+
+WP_BACKUP_FILE: "wpbk.tar.bz2"
+WP_DB_BACKUP_FILE: "dbbk.tar.bz2"
+NGINX_BACKUP_FILE: "nginxbk.tar.bz2"
+
+WP_VOLUME: "wordpress_volume"
+DB_VOLUME: "maria_volume"
+NGINX_VOLUME: "nginx_volume"
+
+wordpress_domain_name: "wordpress.local"
+#disabled when setting up a site, enable it when deploying to production
+SSL: False
+wordpress_letsencrypt_mail: "none@throwaway.devnull"
+letsencrypt_testmode: "true"
+
+#do you want a hidden service too?
+TOR_HH: True
+
+#Do you want to only allow connections from cloudflare?
+CLOUDFLARE: True
+
+#prefix to all containers because of docker_compose
+project_name: wpstack
+
+database_password: disisasecurepassw00rdz0r

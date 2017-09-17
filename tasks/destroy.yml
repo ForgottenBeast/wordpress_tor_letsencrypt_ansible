@@ -1,0 +1,21 @@
+- name: |
+    You are going to COMPLETELY nuke your {{ project_name }} wordpress
+    install on {{ inventory_hostname }}. Think carefully before proceeding,
+    you can still change your mind. You have 1 minute do so.
+  pause:
+    minutes: 1
+
+- name: |
+    You have decided to have it all burnt and so it shall be. Nuking 
+    {{ project_name }} from orbit and off the face of {{ inventory_hostname }}
+  docker_service:
+    state: absent
+    remove_volumes: True
+    project_src: /tmp/{{ project_name }}
+
+- name: "Getting rid of the rubble by pruning the remaning volumes."
+  tags: wp_destroy
+  command: docker volume rm "{{ item }}"
+  with_items:
+    - "{{ WP_VOLUME }}"
+    - "{{ DB_VOLUME }}"
