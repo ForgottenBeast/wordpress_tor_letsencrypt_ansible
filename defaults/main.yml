@@ -20,10 +20,14 @@ WP_VOLUME: "wordpress_volume"
 DB_VOLUME: "maria_volume"
 NGINX_VOLUME: "nginx_volume"
 
+#where the wordpress website should be reachable
+wordpress_ip_addr: "10.10.10.1"
+
 wordpress_domain_name: "wordpress.local"
-#disabled when setting up a site, enable it when deploying to production
-SSL: False
+SSL: True
+
 wordpress_letsencrypt_mail: "none@throwaway.devnull"
+#disabled when setting up a site, enable it when deploying to production
 letsencrypt_testmode: "true"
 
 #do you want a hidden service too?

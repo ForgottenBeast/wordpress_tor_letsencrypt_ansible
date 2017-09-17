@@ -58,6 +58,13 @@
   become: True
   tags: wp_all_restore
 
+- name: "Allow docker container to communicate with the outside"
+  iptables:
+  table: nat
+  chain: POSTROUTING
+  out_interface: eth0
+  jump: MASQUERADE
+
 - include: deploy.yml
   become: True
   tags:

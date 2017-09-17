@@ -16,8 +16,8 @@ services:
     image: jwilder/nginx-proxy
     restart: always
     ports:
-      - "443:443"
-      - "80:80"
+      - "{{wordpress_ip_addr}}:443:443"
+      - "{{wordpress_ip_addr}}:80:80"
     volumes:
       - /var/run/docker.sock:/tmp/docker.sock:ro
       - "/etc/nginx/vhost.d"
