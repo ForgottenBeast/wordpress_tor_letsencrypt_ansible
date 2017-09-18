@@ -89,19 +89,24 @@
     msg: The deed is done.
   tags: wp_destroy
 
-- name: "Check up time!"
+- name: "Checking cert obtention"
+  tags:
+    - firewall
+    - wp_deploy
+    - wp_restore
+  become: True
+  command: docker logs {{project_name}}_letsencrypt_nginx_companion_1
+  when: SSL == True
+  register: cert
+  until: cert.stderr.find("Saving cert.pem") != -1
+  retries: 60
+  delay: 5
+
+- name: "Certs obtained!"
   tags: firewall
   pause:
     prompt: |
-      "Please make sure that the letsencrypt certificate has been correctly generated
-      before continuing with the firewall setup. If you set up the firewall before the
-      letsencrypt certificate has been obtained then letsencrypt servers won't be able 
-      to contact yours.
-
-      To check your certificate status connect to your server using ssh and run:
-      docker logs -f wpstack_letsencrypt_nginx_companion_1
-
-      Then wait until you get the message that the certificate has been correctly created."
+      "You can now enable your site on cloudflare"
   when: CLOUDFLARE == True
 
 - include: firewall.yml
