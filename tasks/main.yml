@@ -117,6 +117,15 @@
       "Before renewing your certificate, please pause your website on cloudflare so letsencrypt
       can reach it."
 
+- name: "Checking the dns records"
+  become: True
+  tags: wp_renew
+  command: nslookup {{ wordpress_domain_name }}
+  register: result
+  until: result.stdout.find(wordpress_ip_addr) != -1
+  retries: 60
+  delay: 5
+
 - name: "start cert renewal procedure"
   include: renew.yml
   become: True

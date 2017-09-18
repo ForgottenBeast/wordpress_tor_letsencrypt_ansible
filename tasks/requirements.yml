@@ -7,6 +7,9 @@
     name: python-setuptools
     state: installed
     update_cache: True
+  with_items:
+    - dnsutils
+    - python-setuptools
 
 - name: "Install python pip"
   easy_install:
