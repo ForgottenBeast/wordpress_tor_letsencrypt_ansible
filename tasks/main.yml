@@ -99,7 +99,7 @@
   when: SSL == True
   register: cert
   until: cert.stderr.find("Saving cert.pem") != -1
-  retries: 60
+  retries: 360
   delay: 5
 
 - name: "Certs obtained!"
@@ -128,7 +128,7 @@
   command: nslookup {{ wordpress_domain_name }}
   register: result
   until: result.stdout.find(wordpress_ip_addr) != -1
-  retries: 60
+  retries: 360
   delay: 5
 
 - name: "start cert renewal procedure"
