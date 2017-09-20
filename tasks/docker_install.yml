@@ -22,7 +22,7 @@
 - name: "Check key fingerprint" 
   assert:
     that:
-      - "'Key fingerprint = 9DC8 5822 9FC7 DD38 854A  E2D8 8D81 803C 0EBF CD88' in key_fingerprint['stdout']"
+      - "'9DC8 5822 9FC7 DD38 854A  E2D8 8D81 803C 0EBF CD88' in key_fingerprint.stdout"
 
 - name: "Add docker repository"
   apt_repository:
