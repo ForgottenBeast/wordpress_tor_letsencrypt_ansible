@@ -11,7 +11,6 @@ tor_hidden_service_private_key:
 
 WP_BACKUP_FILE: "wpbk.tar.bz2"
 WP_DB_BACKUP_FILE: "dbbk.tar.bz2"
-NGINX_BACKUP_FILE: "nginxbk.tar.bz2"
 
 WP_VOLUME: "wordpress_volume"
 DB_VOLUME: "maria_volume"
