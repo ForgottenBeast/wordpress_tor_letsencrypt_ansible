@@ -116,6 +116,7 @@
 
 - name: "Pause on cloudflare"
   become: True
+  when: CLOUDFLARE == True
   tags: wp_renew
   pause:
     prompt: |
