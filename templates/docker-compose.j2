@@ -22,6 +22,7 @@ services:
   wordpress:
     restart: always
     image: wordpress
+    network_mode: bridge
     environment:
      WORDPRESS_DB_PASSWORD: {{ database_password }}
      VIRTUAL_HOST: {{ wordpress_domain_name }}
