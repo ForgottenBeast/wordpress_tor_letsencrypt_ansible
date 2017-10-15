@@ -1,22 +1,3 @@
-- include: requirements.yml
-  become: True
-  tags:
-   - wp_deploy
-   - docker_install
-
-- name: "Test if docker is installed"
-  tags: wp_deploy
-  become: True
-  command: which docker
-  ignore_errors: True
-  register: docker_present
-
-- name: "Installing docker"
-  include: docker_install.yml
-  become: True
-  tags: wp_deploy
-  when: docker_present|failed
-
 - include: create_volumes.yml
   become: True
   tags:
