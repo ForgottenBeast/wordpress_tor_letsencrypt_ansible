@@ -13,6 +13,7 @@ volumes:
 services:
   db:
     image: mariadb:latest
+    network_mode: bridge
     restart: always
     environment:
       - MYSQL_ROOT_PASSWORD={{ database_password }}
@@ -37,6 +38,7 @@ services:
      - db:mysql
 {% if TOR_HH == True %}
   torhh:
+    network_mode: bridge
     restart: always
     image: goldy/tor-hidden-service
     links:
