@@ -12,9 +12,6 @@ WP_DB_BACKUP_FILE: "dbbk.tar.bz2"
 WP_VOLUME: "wordpress_volume"
 DB_VOLUME: "maria_volume"
 
-#where the wordpress website should be reachable
-wordpress_ip_addr: "10.10.10.1"
-
 wordpress_domain_name: "wordpress.local,wordpress.oaezprojaprejo.onion"
 SSL: True
 
