@@ -4,6 +4,13 @@
 
 
 version: "2"
+
+
+networks:
+  proxy_net:
+    external:
+      name: proxy_net
+
 volumes:
   {{ DB_VOLUME }}:
     external: True
@@ -13,7 +20,8 @@ volumes:
 services:
   db:
     image: mariadb:latest
-    network_mode: bridge
+    networks:
+      - proxy_net
     restart: always
     environment:
       - MYSQL_ROOT_PASSWORD={{ database_password }}
@@ -23,7 +31,8 @@ services:
   wordpress:
     restart: always
     image: wordpress
-    network_mode: bridge
+    networks:
+      - proxy_net
     environment:
      WORDPRESS_DB_PASSWORD: {{ database_password }}
      VIRTUAL_HOST: {{ wordpress_domain_name }}
@@ -36,16 +45,3 @@ services:
      - {{ WP_VOLUME }}:/var/www/html
     links:
      - db:mysql
-{% if TOR_HH == True %}
-  torhh:
-    network_mode: bridge
-    restart: always
-    image: goldy/tor-hidden-service
-    links:
-      - wordpress
-    environment:
-      WORDPRESS_KEY: |
-{{ wpkey(tor_hidden_service_private_key) | indent(8,True) }}
-        
-      WORDPRESS_PORTS: 80:80
-{% endif %}

@@ -1,3 +1,7 @@
+- name: "Create proxy_net if it does not exist"
+  docker_network:
+    name: proxy_net
+
 - include: create_volumes.yml
   become: True
   tags:
@@ -20,11 +24,6 @@
   file:
     name: /tmp/{{ project_name }}
     state: directory
-
-- name: "Creating a tor hidden service private key if there is none..."
-  include: gen_rsa.yml
-  when: tor_hidden_service_private_key == None and
-        TOR_HH == True
 
 - name: "Write docker-compose"
   tags: 

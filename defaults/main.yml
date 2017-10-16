@@ -6,9 +6,6 @@
 #alpine image used for volume backup and restores
 alpine_image: alpine
 
-#if left undefined a key will be automatically created
-tor_hidden_service_private_key:
-
 WP_BACKUP_FILE: "wpbk.tar.bz2"
 WP_DB_BACKUP_FILE: "dbbk.tar.bz2"
 
@@ -18,15 +15,12 @@ DB_VOLUME: "maria_volume"
 #where the wordpress website should be reachable
 wordpress_ip_addr: "10.10.10.1"
 
-wordpress_domain_name: "wordpress.local"
+wordpress_domain_name: "wordpress.local,wordpress.oaezprojaprejo.onion"
 SSL: True
 
 wordpress_letsencrypt_mail: "none@throwaway.devnull"
 #disabled when setting up a site, enable it when deploying to production
 letsencrypt_testmode: "true"
-
-#do you want a hidden service too?
-TOR_HH: True
 
 #prefix to all containers because of docker_compose
 project_name: wpstack
