@@ -43,7 +43,7 @@
   tags:
    - wp_deploy
    - wp_restore
-  command: iptables -t nat -A POSTROUTING -s 172.0.0.0/8 ! -d 172.0.0.0/8 -j MASQUERADE
+  command: iptables -t nat -A POSTROUTING -s 172.16.0.0/12 ! -d 172.16.0.0/12 -j MASQUERADE
 
 - include: deploy.yml
   become: True
