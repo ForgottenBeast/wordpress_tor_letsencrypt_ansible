@@ -1,4 +1,8 @@
 - name: "Create proxy_net if it does not exist"
+  become: True
+  tags:
+    - wp_deploy
+    - wp_setup
   docker_network:
     name: proxy_net
 

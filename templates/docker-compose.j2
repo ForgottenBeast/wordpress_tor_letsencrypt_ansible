@@ -37,9 +37,9 @@ services:
      WORDPRESS_DB_PASSWORD: {{ database_password }}
      VIRTUAL_HOST: {{ wordpress_domain_name }}
 {% if SSL == True %}
-     LETSENCRYPT_HOST: {{ wordpress_domain_name }}
+     LETSENCRYPT_HOST: {{ wordpress_letsencrypt_domain_name }}
      LETSENCRYPT_EMAIL: {{ wordpress_letsencrypt_mail }}
-     LETSENCRYPT_TEST: "{{ letsencrypt_testmode }}"
+     LETSENCRYPT_TEST: "{{ wordpress_letsencrypt_testmode }}"
 {% endif %}
     volumes:
      - {{ WP_VOLUME }}:/var/www/html
