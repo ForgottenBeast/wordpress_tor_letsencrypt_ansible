@@ -42,13 +42,6 @@
   become: True
   tags: wp_all_restore
 
-- name: "Allow docker containers to communicate with the outside"
-  become: True
-  tags:
-   - wp_deploy
-   - wp_restore
-  command: iptables -t nat -A POSTROUTING -s 172.16.0.0/12 ! -d 172.16.0.0/12 -j MASQUERADE
-
 - include: deploy.yml
   become: True
   tags:
